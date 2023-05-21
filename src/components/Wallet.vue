@@ -1,10 +1,20 @@
+
 <template>
     <div class="flex flex-col items-center">
         <h1>Wallet</h1>
-        <span>Login|Register</span>
+        <span>{{ props.action }}</span>
     </div>
 </template>
 <script setup lang="ts">
+// @ts-nocheck
+const telegram = window.Telegram.WebApp
+
+const props = defineProps({
+    action: {
+        type: String,
+        require: true,
+    }
+})
 </script>
 <style scoped>
 .flex {

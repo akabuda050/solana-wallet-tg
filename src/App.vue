@@ -1,11 +1,17 @@
 <script setup lang="ts">
+// @ts-nocheck
 import WalletVue from './components/Wallet.vue';
 
+const telegram = window.Telegram.WebApp
+telegram.ready()
+telegram.expand()
+let params = new URLSearchParams(window.location.search);
+const action = params.get("action") || 'Unknown';
 </script>
 
 <template>
   <main>
-    <WalletVue />
+    <WalletVue :action="action"/>
   </main>
 </template>
 
