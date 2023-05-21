@@ -3,6 +3,9 @@
     <div class="flex flex-col items-center">
         <h1>Wallet</h1>
         <span>{{ props.action }}</span>
+        <button @click="() => {
+            sendHello();
+        }"></button>
     </div>
 </template>
 <script setup lang="ts">
@@ -15,6 +18,12 @@ const props = defineProps({
         require: true,
     }
 })
+
+const sendHello = () => {
+    telegram.sendData({
+        action: props.action
+    })
+}
 </script>
 <style scoped>
 .flex {
