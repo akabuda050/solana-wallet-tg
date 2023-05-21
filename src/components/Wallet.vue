@@ -4,8 +4,8 @@
         <h1>Wallet</h1>
         <span>{{ props.action }}</span>
         <button @click="() => {
-            sendHello();
-        }"></button>
+            sendAction();
+        }">Send Action</button>
     </div>
 </template>
 <script setup lang="ts">
@@ -19,10 +19,10 @@ const props = defineProps({
     }
 })
 
-const sendHello = () => {
-    telegram.sendData({
+const sendAction = () => {
+    telegram.sendData(JSON.stringify({
         action: props.action
-    })
+    }))
 }
 </script>
 <style scoped>
