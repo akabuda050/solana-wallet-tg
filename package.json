@@ -11,6 +11,8 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
   },
   "dependencies": {
+    "crypto-js": "^4.1.1",
+    "sjcl": "^1.0.8",
     "vue": "^3.3.2"
   },
   "devDependencies": {
