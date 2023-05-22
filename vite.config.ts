@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/solana-wallet-tg/',
+  //base: '/solana-wallet-tg/',
   plugins: [vue()],
   resolve: {
     alias: {

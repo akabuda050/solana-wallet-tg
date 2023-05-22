@@ -55,23 +55,4 @@ const sendAction2 = () => {
 }
 </script>
 <style scoped>
-code {
-    word-break: break-all;
-}
-
-.flex {
-    display: flex;
-}
-
-.flex-col {
-    flex-direction: column;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.justify-center {
-    justify-content: center;
-}
 </style>
