@@ -305,12 +305,13 @@ watch(() => encrypted.value, (val) => {
         telegram.MainButton.color = '#b194f5';
         if (canShowDisconnect.value) {
             telegram.MainButton.show();
-            telegram.BackButton.hide();
         }
     } else {
         action.value = undefined;
         telegram.MainButton.hide()
     }
+
+    telegram.BackButton.hide();
 });
 
 const showDisconnectButton = () => {
