@@ -309,6 +309,11 @@ watch(() => encrypted.value, (val) => {
         telegram.MainButton.hide()
     }
 });
+
+const showDisconnectButton = () => {
+    document.removeEventListener('click', showDisconnectButton)
+}
+
 const inFlight = ref(0);
 const transactions = ref([]);
 const connection = ref(createConnection());
@@ -350,9 +355,7 @@ onMounted(() => {
         telegram.MainButton.color = '#b194f5';
         telegram.BackButton.hide();
 
-        setTimeout(() => {
-            telegram.MainButton.show();
-        }, 1000);
+        document.addEventListener('click', showDisconnectButton)
 
         connection.value.onAccountChange(getPublicKey(pubclicKey.value), (account) => {
             balance.value = account?.lamports || 0;
