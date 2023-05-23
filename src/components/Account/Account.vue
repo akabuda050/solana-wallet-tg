@@ -304,7 +304,7 @@ onMounted(() => {
         getBalance(getPublicKey(pubclicKey.value)).then((bal) => {
             balance.value = bal
         });
-    }, 10000)
+    }, 3500)
 })
 
 telegram.BackButton.onClick(() => {
