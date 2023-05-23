@@ -148,7 +148,7 @@
                     </div>
                     <div class="flex flex-col items-center gap-1">
                         <div @click="() => {
-                            requestAirdrop(pubclicKey, connection)
+                            requestAirdrop(connection, pubclicKey)
                             notify('Requested. Please wait.');
                         }"
                             class="flex items-center justify-center bg-green-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-green-500/50 w-14 h-14">
@@ -228,8 +228,8 @@
                             placeholder="Enter your password">
                     </div>
                 </div>
-                
-                <!-- <button @click="sendTransactionToAccount(recepinet, amount)">Send</button> -->
+               
+                <!-- <button @click="sendTransactionToAccount(recepinet, amount)">Send</button>-->
             </template>
         </div>
     </div>
