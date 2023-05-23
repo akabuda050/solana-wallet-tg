@@ -317,6 +317,8 @@ const showDisconnectButton = () => {
     telegram.MainButton.show();
     canShowDisconnect.value = true;
     document.removeEventListener('click', showDisconnectButton)
+    document.removeEventListener('touchstart', showDisconnectButton)
+
 }
 
 const inFlight = ref(0);
@@ -361,6 +363,8 @@ onMounted(() => {
         telegram.BackButton.hide();
 
         document.addEventListener('click', showDisconnectButton)
+        document.addEventListener('touchstart', showDisconnectButton)
+
 
         connection.value.onAccountChange(getPublicKey(pubclicKey.value), (account) => {
             balance.value = account?.lamports || 0;
