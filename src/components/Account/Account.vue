@@ -148,7 +148,7 @@
                     </div>
                     <div class="flex flex-col items-center gap-1">
                         <div @click="() => {
-                            requestAirdrop(pubclicKey)
+                            requestAirdrop(pubclicKey, connection)
                             notify('Requested. Please wait.');
                         }"
                             class="flex items-center justify-center bg-green-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-green-500/50 w-14 h-14">
@@ -169,7 +169,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-1" v-if="!send">
-                    <h2 class="text-gray-700 text-md font-medium">Last 5 Transactions</h2>
+                    <h2 class="text-gray-700 text-md font-medium">Last {{ transactions.length }} Transactions</h2>
                     <div
                         class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
                         <template v-if="transactions.length">
@@ -229,6 +229,7 @@
                     </div>
                 </div>
                 <button @click="sendTransactionToAccount(recepinet, amount)">Send</button>
+                <!---->
             </template>
         </div>
     </div>
@@ -236,12 +237,12 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { encryptPrivateKey, decryptPrivateKey, getRandomBytes } from '../../scripts/crypto';
-import { getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop, getHistory } from '../../scripts/solana';
+import { createConnection, getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop, getHistory } from '../../scripts/solana';
 
 import { onMounted, ref, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowRight, faDownload, faFileInvoiceDollar } from '@fortawesome/free-solid-svg-icons'
-import { faSquarePlus, faFileText, faPaperPlane, } from '@fortawesome/free-regular-svg-icons'
+import { faSquarePlus, faFileText, faPaperPlane } from '@fortawesome/free-regular-svg-icons'
 import { toast } from 'vue3-toastify';
 
 const notify = (prompt) => {
@@ -309,19 +310,20 @@ watch(() => encrypted.value, (val) => {
 });
 const inFlight = ref(0);
 const transactions = ref([]);
+const connection = ref(createConnection());
 onMounted(() => {
     encrypted.value = localStorage.getItem('pkey');
     pubclicKey.value = localStorage.getItem('pubKey');
     console.log(pubclicKey.value)
     if (encrypted.value) {
-        getBalance(getPublicKey(pubclicKey.value)).then((bal) => {
+        getBalance(connection.value, getPublicKey(pubclicKey.value)).then((bal) => {
             console.log(bal)
             balance.value = bal
         });
 
         if (inFlight.value < 1) {
             inFlight.value++
-            getHistory(getPublicKey(pubclicKey.value)).then((list) => {
+            getHistory(connection.value, getPublicKey(pubclicKey.value)).then((list) => {
                 balance.value = list[0]?.balance || 0;
                 transactions.value = list;
             }).finally(() => {
@@ -339,25 +341,21 @@ onMounted(() => {
 
         setTimeout(() => {
             telegram.MainButton.show();
-        }, 1000)
-    }
+        }, 1000);
 
-    setInterval(() => {
-        console.log(inFlight.value)
-        if (inFlight.value < 1) {
-            inFlight.value++
-            getHistory(getPublicKey(pubclicKey.value), { limit: 1 }).then((trans) => {
+        connection.value.onAccountChange(getPublicKey(pubclicKey.value), () => {
+            getHistory(connection.value, getPublicKey(pubclicKey.value), { limit: 1 }).then((trans) => {
                 if (trans.length && !transactions.value.some((t) => t.tsig === trans[0]?.tsig)) {
                     transactions.value.unshift(trans[0]);
                     balance.value = trans[0]?.balance || 0;
 
-                    notify(`Receied: ${((trans[0]?.amount || 0) * 0.000000001).toFixed(5)}`);
+                    if (trans[0]?.amount && !trans[0]?.itsMine) {
+                        notify(`Receied: ${((trans[0]?.amount || 0) * 0.000000001).toFixed(5)}`);
+                    }
                 }
-            }).finally(() => {
-                inFlight.value--
-            });
-        }
-    }, 10000)
+            })
+        })
+    }
 })
 
 telegram.BackButton.onClick(() => {
@@ -411,7 +409,7 @@ telegram.MainButton.onClick(() => {
                 localStorage.setItem('pubKey', pubclicKey.value);
 
                 console.log(pubclicKey.value)
-                getBalance(acc.account._publicKey).then((bal) => {
+                getBalance(connection.value, acc.account._publicKey).then((bal) => {
                     console.log(bal)
                     balance.value = bal
                 });
@@ -471,17 +469,9 @@ const sendTransactionToAccount = async (to, amnt) => {
     const acc = await generateAccount(decyptedRecover);
 
     notify('Sent. Wait confirmation.');
-    const transaction = await sendTransaction(acc.account, to, amnt / 0.000000001);
-
-    transactions.value.unshift({
-        balance: balance.value - amnt / 0.000000001,
-        tsig: transaction,
-        amount: amnt / 0.000000001,
-        accounts: [pubclicKey.value]
-    })
+    const transaction = await sendTransaction(connection.value, acc.account, to, amnt / 0.000000001);
 
     notify('Confirmed.');
-
 
     balance.value = balance.value - amnt / 0.000000001;
     console.log(transaction);

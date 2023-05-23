@@ -2,8 +2,8 @@
 import * as web3 from '@solana/web3.js';
 
 // Create connection
-function createConnection(url = "https://api.testnet.solana.com") {
-    return new web3.Connection(url);
+export function createConnection(url = "https://api.testnet.solana.com") {
+    return new web3.Connection(url, 'confirmed');
 }
 
 // Generate account
@@ -26,9 +26,7 @@ export async function generateMnemonic() {
 
 
 // Get balance
-export async function getBalance(publicKey) {
-    const connection = createConnection();
-
+export async function getBalance(connection, publicKey) {
     return await connection.getBalance(getPublicKey(publicKey));
 }
 
@@ -37,14 +35,13 @@ export function getPublicKey(publicKey) {
 }
 
 // Send transaction
-export async function sendTransaction(account, recipientPublicKey, recipientAmount) {
+export async function sendTransaction(connection, account, recipientPublicKey, recipientAmount) {
     console.log(account, recipientPublicKey, recipientAmount)
     const transaction = new web3.Transaction().add(web3.SystemProgram.transfer({
         fromPubkey: new web3.PublicKey(account._publicKey),
         toPubkey: new web3.PublicKey(recipientPublicKey),
         lamports: recipientAmount,
     }));
-    const connection = createConnection();
 
     const signature = await web3.sendAndConfirmTransaction(
         connection,
@@ -60,12 +57,10 @@ export async function sendTransaction(account, recipientPublicKey, recipientAmou
 
 // Get history
 // https://solana-labs.github.io/solana-web3.js/class/src/connection.js~Connection.html#instance-method-getConfirmedSignaturesForAddress
-export async function getHistory(publicKey, options = { limit: 5, before: undefined }) {
-    const connection = createConnection();
-
+export async function getHistory(connection, publicKey, options = { limit: 5, before: undefined }) {
     const transactions = await connection.getConfirmedSignaturesForAddress2(publicKey, options);
     const mappedTransactions = await Promise.all(transactions.map(async (t) => {
-        const trans = await getTransaction(t.signature);
+        const trans = await getTransaction(connection, t.signature);
         console.log(trans);
         const account = trans?.transaction.message.getAccountKeys();
 
@@ -80,7 +75,8 @@ export async function getHistory(publicKey, options = { limit: 5, before: undefi
             amount: itsMine ? preBalance - postBalance : postBalance - preBalance,
             accounts: trans?.transaction.message.getAccountKeys().staticAccountKeys.map(a => {
                 return a.toBase58()
-            })
+            }),
+            itsMine,
         };
     }));
     console.log(mappedTransactions)
@@ -88,16 +84,12 @@ export async function getHistory(publicKey, options = { limit: 5, before: undefi
     return mappedTransactions;
 }
 
-export async function getTransaction(sig) {
-    const connection = createConnection();
-
+export async function getTransaction(connection, sig) {
     return await connection.getTransaction(sig);
 }
 
 // Airdrop request
 // lamports is 0.000000001 of SOL
-export async function requestAirdrop(publicKey, lamports = 1000000) {
-    const connection = createConnection();
-
+export async function requestAirdrop(connection, publicKey, lamports = 1000000) {
     return connection.requestAirdrop(getPublicKey(publicKey), lamports)
 }
