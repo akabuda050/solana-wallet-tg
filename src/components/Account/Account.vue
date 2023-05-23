@@ -20,7 +20,7 @@
             </template>
             <template v-else-if="action === 'wallet'">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-3xl text-slate-700 font-bold">Balance</h1>
+                    <h1 class="text-3xl text-slate-700 font-bold">Account</h1>
                     <span class="inline-flex items-center justify-center h-4 w-4 rounded-full border-black" :class="{
                         'bg-green-500': !!encrypted,
                         'bg-gray-500': !encrypted
