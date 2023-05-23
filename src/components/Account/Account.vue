@@ -520,11 +520,7 @@ const sendTransactionToAccount = async (to, amnt) => {
     const acc = await generateAccount(decyptedRecover);
 
     notify('Sent. Wait confirmation.');
-    const transaction = await sendTransaction(connection.value, acc.account, to, amnt / 0.000000001);
 
-    notify('Confirmed.');
-
-    console.log(transaction);
 
     secretPassword.value = null
     recepinet.value = null
@@ -534,6 +530,13 @@ const sendTransactionToAccount = async (to, amnt) => {
     telegram.MainButton.color = '#b194f5';
     telegram.MainButton.show();
     telegram.BackButton.hide();
+
+    const transaction = await sendTransaction(connection.value, acc.account, to, amnt / 0.000000001);
+
+    notify('Confirmed.');
+
+    console.log(transaction);
+
 }
 </script>
 <style scoped>
