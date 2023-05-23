@@ -316,11 +316,6 @@ onMounted(() => {
     pubclicKey.value = localStorage.getItem('pubKey');
     console.log(pubclicKey.value)
     if (encrypted.value) {
-        getBalance(connection.value, getPublicKey(pubclicKey.value)).then((bal) => {
-            console.log(bal)
-            balance.value = bal
-        });
-
         if (inFlight.value < 1) {
             inFlight.value++
             getHistory(connection.value, getPublicKey(pubclicKey.value)).then((list) => {
@@ -343,11 +338,12 @@ onMounted(() => {
             telegram.MainButton.show();
         }, 1000);
 
-        connection.value.onAccountChange(getPublicKey(pubclicKey.value), () => {
+        connection.value.onAccountChange(getPublicKey(pubclicKey.value), (account) => {
+            balance.value = account?.lamports || 0;
+
             getHistory(connection.value, getPublicKey(pubclicKey.value), { limit: 1 }).then((trans) => {
                 if (trans.length && !transactions.value.some((t) => t.tsig === trans[0]?.tsig)) {
                     transactions.value.unshift(trans[0]);
-                    balance.value = trans[0]?.balance || 0;
 
                     if (trans[0]?.amount && !trans[0]?.itsMine) {
                         notify(`Receied: ${((trans[0]?.amount || 0) * 0.000000001).toFixed(5)}`);
@@ -473,7 +469,6 @@ const sendTransactionToAccount = async (to, amnt) => {
 
     notify('Confirmed.');
 
-    balance.value = balance.value - amnt / 0.000000001;
     console.log(transaction);
 
     secretPassword.value = null
