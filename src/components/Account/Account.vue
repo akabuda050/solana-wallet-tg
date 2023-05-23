@@ -311,6 +311,7 @@ watch(() => encrypted.value, (val) => {
 });
 
 const showDisconnectButton = () => {
+    telegram.MainButton.show();
     document.removeEventListener('click', showDisconnectButton)
 }
 
