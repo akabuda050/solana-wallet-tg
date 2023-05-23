@@ -163,32 +163,36 @@
                     <h2 class="text-gray-700 text-md font-medium">Transactions</h2>
                     <div
                         class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
-                        <div
-                            class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="flex items-center justify-center bg-sky-500 rounded-full shadow-md shadow-cyan-500/50 w-8 h-8">
-                                    <font-awesome-icon size="sm" :icon="faPaperPlane" class="text-white" />
+                        <template v-if="transactions.length">
+                            <div class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200"
+                                v-for="transaction in transactions" :key="transaction.tsig">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center justify-center rounded-full shadow-md w-8 h-8" :class="{
+
+                                        'bg-sky-500 shadow-cyan-500/50': pubclicKey === transaction.accounts[0],
+                                        'bg-green-500 shadow-green-500/50': pubclicKey !== transaction.accounts[0],
+                                    }">
+                                        <font-awesome-icon size="sm"
+                                            :icon="pubclicKey === transaction.accounts[0] ? faPaperPlane : faDownload"
+                                            class="text-white" />
+                                    </div>
+                                    <span class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">{{
+                                        transaction.tsig }}</span>
                                 </div>
-                                <span
-                                    class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
+                                <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
+                                <span class="text-xs font-semibold" :class="{
+                                    'text-red-600': pubclicKey === transaction.accounts[0],
+                                    'text-green-600': pubclicKey !== transaction.accounts[0],
+                                }">${{ (transaction.amount * 0.000000001).toFixed(5) }}</span>
                             </div>
-                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
-                            <span class="text-slate-500 text-xs text-green-600 font-semibold">$100</span>
-                        </div>
-                        <div
-                            class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200">
-                            <div class="flex items-center gap-3 ">
-                                <div
-                                    class="flex items-center justify-center bg-green-500 rounded-full shadow-md shadow-green-500/50 w-8 h-8">
-                                    <font-awesome-icon size="sm" :icon="faDownload" class="text-white" />
-                                </div>
-                                <span
-                                    class="text-slate-500 text-xs max-w-[150px] font-semibold truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
+                        </template>
+                        <template v-else>
+                            <div
+                                class="flex items-center justify-center bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200">
+                                <span class="text-slate-500 text-xs text-slate-500 font-semibold">Empty</span>
                             </div>
-                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
-                            <span class="text-slate-500 text-xs text-red-600 font-semibold">$100</span>
-                        </div>
+                        </template>
+
                     </div>
                 </div>
                 <div class="flex flex-col gap-1" v-else>
@@ -211,6 +215,7 @@
                             placeholder="Enter your password">
                     </div>
                 </div>
+
             </template>
         </div>
     </div>
@@ -218,7 +223,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { encryptPrivateKey, decryptPrivateKey, getRandomBytes } from '../../scripts/crypto';
-import { getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop } from '../../scripts/solana';
+import { getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop, getHistory } from '../../scripts/solana';
 
 import { onMounted, ref, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -278,7 +283,8 @@ watch(() => encrypted.value, (val) => {
         telegram.MainButton.hide()
     }
 });
-
+const inFlight = ref(0);
+const transactions = ref([]);
 onMounted(() => {
     encrypted.value = localStorage.getItem('pkey');
     pubclicKey.value = localStorage.getItem('pubKey');
@@ -288,6 +294,18 @@ onMounted(() => {
             console.log(bal)
             balance.value = bal
         });
+
+        if (inFlight.value < 1) {
+            inFlight.value++
+            getHistory(getPublicKey(pubclicKey.value)).then((list) => {
+                balance.value = list[0]?.balance || 0;
+                transactions.value = list;
+            }).finally(() => {
+                inFlight.value--
+            })
+        }
+
+
 
         action.value = 'wallet'
 
@@ -301,10 +319,19 @@ onMounted(() => {
     }
 
     setInterval(() => {
-        getBalance(getPublicKey(pubclicKey.value)).then((bal) => {
-            balance.value = bal
-        });
-    }, 3500)
+        console.log(inFlight.value)
+        if (inFlight.value < 1) {
+            inFlight.value++
+            getHistory(getPublicKey(pubclicKey.value), { limit: 1 }).then((trans) => {
+                if (trans.length && !transactions.value.some((t) => t.tsig === trans[0]?.tsig)) {
+                    transactions.value.unshift(trans[0]);
+                    balance.value = trans[0]?.balance || 0;
+                }
+            }).finally(() => {
+                inFlight.value--
+            });
+        }
+    }, 3000)
 })
 
 telegram.BackButton.onClick(() => {
@@ -412,6 +439,15 @@ const sendTransactionToAccount = async (to, amnt) => {
     let decyptedRecover = decryptPrivateKey(encrypted.value, secretPassword.value);
     const acc = await generateAccount(decyptedRecover);
     const transaction = await sendTransaction(acc.account, to, amnt / 0.000000001);
+
+    transactions.value.unshift({
+        balance: balance.value - amnt / 0.000000001,
+        tsig: transaction,
+        amount: amnt / 0.000000001,
+        accounts: [pubclicKey.value]
+    })
+
+    balance.value = balance.value - amnt / 0.000000001;
 
     console.log(transaction);
 

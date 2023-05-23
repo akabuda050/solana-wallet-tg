@@ -60,10 +60,38 @@ export async function sendTransaction(account, recipientPublicKey, recipientAmou
 
 // Get history
 // https://solana-labs.github.io/solana-web3.js/class/src/connection.js~Connection.html#instance-method-getConfirmedSignaturesForAddress
-export async function getHistory(publicKey, options = { limit: 20 }) {
+export async function getHistory(publicKey, options = { limit: 5, before: undefined }) {
     const connection = createConnection();
 
-    return connection.getConfirmedSignaturesForAddress2.getBalance(publicKey, options);
+    const transactions = await connection.getConfirmedSignaturesForAddress2(publicKey, options);
+    const mappedTransactions = await Promise.all(transactions.map(async (t) => {
+        const trans = await getTransaction(t.signature);
+        console.log(trans);
+        const account = trans?.transaction.message.getAccountKeys();
+
+        const itsMine = account?.get(0)?.toBase58() === publicKey.toBase58();
+
+        const preBalance = itsMine ? trans?.meta?.preBalances[0] : trans?.meta?.preBalances[1] || 0;
+        const postBalance = itsMine ? trans?.meta?.postBalances[0] : trans?.meta?.postBalances[1] || 0;
+
+        return {
+            tsig: t.signature,
+            balance: postBalance,
+            amount: itsMine ? preBalance - postBalance : postBalance - preBalance,
+            accounts: trans?.transaction.message.getAccountKeys().staticAccountKeys.map(a => {
+                return a.toBase58()
+            })
+        };
+    }));
+    console.log(mappedTransactions)
+
+    return mappedTransactions;
+}
+
+export async function getTransaction(sig) {
+    const connection = createConnection();
+
+    return await connection.getTransaction(sig);
 }
 
 // Airdrop request
