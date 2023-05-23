@@ -323,8 +323,12 @@ onMounted(() => {
         if (startAction === 'enable_notifications') {
             telegram.sendData(JSON.stringify({
                 pubKey: pubclicKey.value,
-                lastTransaction: transactions[0] || null
-
+                action: 'enable'
+            }))
+        } else if (startAction === 'disable_notifications') {
+            telegram.sendData(JSON.stringify({
+                pubKey: pubclicKey.value,
+                action: 'disable'
             }))
         }
 
@@ -436,8 +440,12 @@ telegram.MainButton.onClick(() => {
                 if (startAction === 'enable_notifications') {
                     telegram.sendData(JSON.stringify({
                         pubKey: pubclicKey.value,
-                        lastTransaction: transactions[0]?.tsig || null
-
+                        action: 'enable'
+                    }))
+                } else if (startAction === 'disable_notifications') {
+                    telegram.sendData(JSON.stringify({
+                        pubKey: pubclicKey.value,
+                        action: 'disable'
                     }))
                 }
             }
@@ -463,7 +471,12 @@ const copyToClipboard = (secretKey) => {
         if (startAction === 'enable_notifications') {
             telegram.sendData(JSON.stringify({
                 pubKey: pubclicKey.value,
-                lastTransaction: transactions[0] || null
+                action: 'enable'
+            }))
+        } else if (startAction === 'disable_notifications') {
+            telegram.sendData(JSON.stringify({
+                pubKey: pubclicKey.value,
+                action: 'disable'
             }))
         }
 
