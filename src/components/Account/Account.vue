@@ -147,7 +147,7 @@
                             class="flex items-center justify-center bg-green-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-green-500/50 w-14 h-14">
                             <font-awesome-icon size="xl" :icon="faDownload" class="text-white" />
                         </div>
-                        <span class="text-slate-500 text-xs font-semibold">Receive</span>
+                        <span class="text-slate-500 text-xs font-semibold">Request Airdrop</span>
 
                     </div>
                     <div class="flex flex-col items-center gap-1">
@@ -173,7 +173,7 @@
                                 <span
                                     class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
                             </div>
-                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">TRX</span>
+                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
                             <span class="text-slate-500 text-xs text-green-600 font-semibold">$100</span>
                         </div>
                         <div
@@ -186,7 +186,7 @@
                                 <span
                                     class="text-slate-500 text-xs max-w-[150px] font-semibold truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
                             </div>
-                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">TRX</span>
+                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
                             <span class="text-slate-500 text-xs text-red-600 font-semibold">$100</span>
                         </div>
                     </div>
