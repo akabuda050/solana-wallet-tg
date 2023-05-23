@@ -228,8 +228,8 @@
                             placeholder="Enter your password">
                     </div>
                 </div>
-                <button @click="sendTransactionToAccount(recepinet, amount)">Send</button>
-                <!---->
+                
+                <!-- <button @click="sendTransactionToAccount(recepinet, amount)">Send</button> -->
             </template>
         </div>
     </div>
