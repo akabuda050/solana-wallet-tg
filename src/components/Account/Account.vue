@@ -160,7 +160,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-1" v-if="!send">
-                    <h2 class="text-gray-700 text-md font-medium">Transactions</h2>
+                    <h2 class="text-gray-700 text-md font-medium">Last 5 Transactions</h2>
                     <div
                         class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
                         <template v-if="transactions.length">
