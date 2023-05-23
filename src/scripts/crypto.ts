@@ -1,8 +1,9 @@
 // @ts-nocheck
 import CryptoJS from 'crypto-js';
+import { generateAccount } from './solana';
 
-export function getRandomBytes() {
-  return CryptoJS.lib.WordArray.random(34).toString();
+export async function getRandomBytes() {
+  return await generateAccount();
 }
 
 // Encryption function

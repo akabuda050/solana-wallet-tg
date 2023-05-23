@@ -18,6 +18,28 @@
                 <span class="text-slate-500">Awesome non-custodial wallet in your telegram</span>
 
             </template>
+            <template v-else-if="action === 'wallet'">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-3xl text-slate-700 font-bold">Balance</h1>
+                    <span class="inline-flex items-center justify-center h-4 w-4 rounded-full border-black" :class="{
+                        'bg-green-500': !!encrypted,
+                        'bg-gray-500': !encrypted
+                    }">
+                        <svg class="h-2 w-2 text-white" viewBox="0 0 8 8" fill="currentColor">
+                            <circle cx="2" cy="2" />
+                        </svg>
+                    </span>
+
+                </div>
+                <div
+                    class="text-slate-500 p-2 text-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 cursor-pointer hover:rounded-lg">
+                    <span class="">{{ balance || 0 }} SOL</span>
+                </div>
+                <div class="text-slate-500 p-2 text-sm font-normal cursor-pointer hover:shadow-lg hover:shadow-cyan-500/50 hover:rounded-lg"
+                    @click="copyToClipboard(pubclicKey)">
+                    <span class="">{{ pubclicKey }}</span>
+                </div>
+            </template>
             <template v-else-if="action === 'new'">
                 <h1 class="text-3xl text-slate-700 font-bold">Set a Password</h1>
                 <span class="text-slate-500">This password is used to protect and provide access to your wallet</span>
@@ -52,7 +74,7 @@
                             <font-awesome-icon size="2xl" :icon="faFileText" />
                             <div class="flex flex-col">
                                 <h2 class="font-bold text-slate-700">Recover wallet</h2>
-                                <span class="text-slate-500">Enter your wallet secret</span>
+                                <span class="text-slate-500">Connect existing one</span>
                             </div>
                         </div>
                         <font-awesome-icon class="" size="2xl" :icon="faArrowRight" />
@@ -91,36 +113,123 @@
 
                 </div>
             </template>
+
         </div>
-        <div v-else>
-            <div class="flex flex-col justify-between gap-3 bg-gray-100 rounded-md p-4 shadow-md">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-700 text-md font-medium">Secret Key:</span>
-                    <button
-                        class="ml-4 px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                        @click="copyToClipboard(encrypted)">Copy</button>
+        <div name="slide-left" tag="div" class="flex flex-col gap-5" v-else>
+            <template v-if="action === 'secret'">
+                <div class="flex flex-col justify-between gap-3 bg-gray-100 rounded-md p-4 shadow-md">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700 text-md font-medium">Secret Key:</span>
+                        <button
+                            class="ml-4 px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            @click="copyToClipboard(encrypted)">Copy</button>
+                    </div>
+                    <div class="bg-gray-200 px-3 py-2 rounded-lg">
+                        <pre class="whitespace-pre-wrap break-all text-sm font-mono text-gray-800">{{ encrypted }}</pre>
+                    </div>
                 </div>
-                <div class="bg-gray-200 px-3 py-2 rounded-lg">
-                    <pre class="whitespace-pre-wrap break-all text-sm font-mono text-gray-800">{{ encrypted }}</pre>
+            </template>
+            <template v-else-if="action === 'wallet'">
+                <div
+                    class="flex items-center justify-between rounded-md shadow-lg bg-gray-100 p-4 hover:shadow-lg hover:shadow-cyan-500/50">
+                    <div class="flex flex-col items-center gap-1">
+                        <div @click="send = true"
+                            class="flex items-center justify-center bg-sky-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-cyan-500/50 w-14 h-14">
+                            <font-awesome-icon size="xl" :icon="faPaperPlane" class="text-white" />
+
+
+                        </div>
+                        <span class="text-slate-500 text-xs font-semibold">Send</span>
+
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div @click="requestAirdrop(pubclicKey)"
+                            class="flex items-center justify-center bg-green-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-green-500/50 w-14 h-14">
+                            <font-awesome-icon size="xl" :icon="faDownload" class="text-white" />
+                        </div>
+                        <span class="text-slate-500 text-xs font-semibold">Receive</span>
+
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <div
+                            class="flex items-center justify-center bg-yellow-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-yellow-500/50 w-14 h-14">
+                            <font-awesome-icon size="xl" :icon="faFileInvoiceDollar" class="text-white" />
+                        </div>
+                        <span class="text-slate-500 text-xs font-semibold">Invoice</span>
+
+                    </div>
                 </div>
-            </div>
+                <div class="flex flex-col gap-1" v-if="!send">
+                    <h2 class="text-gray-700 text-md font-medium">Transactions</h2>
+                    <div
+                        class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
+                        <div
+                            class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="flex items-center justify-center bg-sky-500 rounded-full shadow-md shadow-cyan-500/50 w-8 h-8">
+                                    <font-awesome-icon size="sm" :icon="faPaperPlane" class="text-white" />
+                                </div>
+                                <span
+                                    class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
+                            </div>
+                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">TRX</span>
+                            <span class="text-slate-500 text-xs text-green-600 font-semibold">$100</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200">
+                            <div class="flex items-center gap-3 ">
+                                <div
+                                    class="flex items-center justify-center bg-green-500 rounded-full shadow-md shadow-green-500/50 w-8 h-8">
+                                    <font-awesome-icon size="sm" :icon="faDownload" class="text-white" />
+                                </div>
+                                <span
+                                    class="text-slate-500 text-xs max-w-[150px] font-semibold truncate">trasdkas3122dfhas12trasdkas3122dfhas12</span>
+                            </div>
+                            <span class="text-slate-500 text-xs text-slate-500 font-semibold">TRX</span>
+                            <span class="text-slate-500 text-xs text-red-600 font-semibold">$100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1" v-else>
+                    <h2 class="text-gray-700 text-md font-medium">Send</h2>
+                    <div
+                        class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
+                        <label for="recepinet" class="font-semibold block mb-2">To</label>
+                        <input type="text" id="recepinet" v-model="recepinet"
+                            class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter recepinet address">
 
+                        <label for="amount" class="font-semibold block mb-2">Amount</label>
+                        <input type="number" id="amount" v-model="amount"
+                            class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter amount">
 
-
+                        <label for="secretPassword" class="font-semibold block mb-2">Password</label>
+                        <input type="password" id="secretPassword" v-model="secretPassword"
+                            class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter your password">
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 // @ts-nocheck
 import { encryptPrivateKey, decryptPrivateKey, getRandomBytes } from '../../scripts/crypto';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop } from '../../scripts/solana';
+
+import { onMounted, ref, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import { faSquarePlus, faFileText } from '@fortawesome/free-regular-svg-icons'
+import { faArrowRight, faDownload, faFileInvoiceDollar } from '@fortawesome/free-solid-svg-icons'
+import { faSquarePlus, faFileText, faPaperPlane, } from '@fortawesome/free-regular-svg-icons'
 
 const telegram = window.Telegram.WebApp
 const decrypted = ref(null);
-const encrypted = ref(localStorage.getItem('pkey'));
+const encrypted = ref();
+const balance = ref();
+const pubclicKey = ref('');
 
 const action = ref<string | undefined>(undefined)
 watch(() => action.value, (newAction) => {
@@ -129,13 +238,14 @@ watch(() => action.value, (newAction) => {
         telegram.MainButton.color = '#b194f5';
 
         telegram.MainButton.show()
+    } else if (action.value === 'wallet') {
+
     }
 });
 
 const password = ref<string>('')
 const confirmPassword = ref<string>('')
 watch(() => [confirmPassword.value, password.value], (pass, passVal) => {
-    console.log(pass, passVal)
     if (confirmPassword.value && password.value && password.value === confirmPassword.value) {
         telegram.BackButton.show();
 
@@ -170,7 +280,17 @@ watch(() => encrypted.value, (val) => {
 });
 
 onMounted(() => {
+    encrypted.value = localStorage.getItem('pkey');
+    pubclicKey.value = localStorage.getItem('pubKey');
+    console.log(pubclicKey.value)
     if (encrypted.value) {
+        getBalance(getPublicKey(pubclicKey.value)).then((bal) => {
+            console.log(bal)
+            balance.value = bal
+        });
+
+        action.value = 'wallet'
+
         telegram.MainButton.text = 'Disconnect';
         telegram.MainButton.color = '#b194f5';
         telegram.BackButton.hide();
@@ -197,35 +317,60 @@ telegram.MainButton.onClick(() => {
         action.value = undefined
         telegram.MainButton.hide()
     } else if (telegram.MainButton.text === 'Confirm') {
-        decrypted.value = getRandomBytes();
-        encrypted.value = encryptPrivateKey(decrypted.value, password.value);
-        decrypted.value = '';
+        getRandomBytes().then(({ account, mnemonic }) => {
+            console.log({ account, mnemonic })
+            pubclicKey.value = getPublicKey(account._publicKey).toBase58();
+            localStorage.setItem('pubKey', pubclicKey.value);
 
-        password.value = '';
-        confirmPassword.value = '';
-
-        localStorage.setItem('pkey', encrypted.value);
-        action.value = undefined
-    } else if (telegram.MainButton.text === 'Disconnect') {
-        localStorage.removeItem('pkey');
-        encrypted.value = null;
-        action.value = undefined
-    } else if (telegram.MainButton.text === 'Sign') {
-        let decyptedRecover = decryptPrivateKey(walletSecret.value.trim(), secretPassword.value);
-        console.log(decyptedRecover)
-
-        if (decyptedRecover) {
-            encrypted.value = walletSecret.value;
+            decrypted.value = mnemonic
+            encrypted.value = encryptPrivateKey(decrypted.value, password.value);
             decrypted.value = '';
 
-            walletSecret.value = '';
-            secretPassword.value = '';
+            password.value = '';
+            confirmPassword.value = '';
 
             localStorage.setItem('pkey', encrypted.value);
-            action.value = undefined
-        }
+            action.value = 'secret'
+        });
 
-        decyptedRecover = '';
+    } else if (telegram.MainButton.text === 'Disconnect') {
+        localStorage.removeItem('pubKey');
+        localStorage.removeItem('pkey');
+
+        encrypted.value = null;
+        pubclicKey.value =null;
+
+        action.value = undefined
+    } else if (telegram.MainButton.text === 'Sign') {
+        if (send.value) {
+            sendTransactionToAccount(recepinet.value, amount.value)
+        } else {
+            let decyptedRecover = decryptPrivateKey(walletSecret.value.trim(), secretPassword.value);
+            generateAccount(decyptedRecover).then((acc) => {
+                console.log(acc.account._publicKey)
+                pubclicKey.value = getPublicKey(acc.account._publicKey).toBase58();
+                localStorage.setItem('pubKey', pubclicKey.value);
+
+                console.log(pubclicKey.value)
+                getBalance(acc.account._publicKey).then((bal) => {
+                    console.log(bal)
+                    balance.value = bal
+                });
+            });
+
+            if (decyptedRecover) {
+                encrypted.value = walletSecret.value;
+                decrypted.value = '';
+
+                walletSecret.value = '';
+                secretPassword.value = '';
+
+                localStorage.setItem('pkey', encrypted.value);
+                action.value = 'wallet'
+            }
+
+            decyptedRecover = '';
+        }
     }
 });
 
@@ -238,7 +383,38 @@ const copyToClipboard = (secretKey) => {
     document.execCommand('copy');
     document.body.removeChild(textarea);
 
+    action.value = 'wallet'
+}
 
+const send = ref(false);
+const recepinet = ref();
+const amount = ref();
+
+watch(() => [secretPassword.value, recepinet.value], () => {
+    if (secretPassword.value && recepinet.value) {
+        telegram.BackButton.show();
+
+        telegram.MainButton.text = 'Sign';
+        telegram.MainButton.color = '#b194f5';
+        telegram.MainButton.show()
+    }
+});
+
+const sendTransactionToAccount = async (to, amount) => {
+    send.value = false;
+
+    let decyptedRecover = decryptPrivateKey(encrypted.value, secretPassword.value);
+    const acc = await generateAccount(decyptedRecover);
+    console.log(acc);
+    const transaction = await sendTransaction(acc.account, to, amount);
+
+    console.log(transaction);
+
+
+    telegram.MainButton.text = 'Disconnect';
+    telegram.MainButton.color = '#b194f5';
+    telegram.MainButton.show();
+    telegram.BackButton.hide();
 }
 </script>
 <style scoped></style>
