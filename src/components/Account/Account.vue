@@ -298,12 +298,15 @@ watch(() => [secretPassword.value, walletSecret.value], () => {
     }
 });
 
+const canShowDisconnect = ref(false);
 watch(() => encrypted.value, (val) => {
     if (val) {
         telegram.MainButton.text = 'Disconnect';
         telegram.MainButton.color = '#b194f5';
-        telegram.MainButton.show();
-        telegram.BackButton.hide();
+        if (canShowDisconnect.value) {
+            telegram.MainButton.show();
+            telegram.BackButton.hide();
+        }
     } else {
         action.value = undefined;
         telegram.MainButton.hide()
@@ -312,6 +315,7 @@ watch(() => encrypted.value, (val) => {
 
 const showDisconnectButton = () => {
     telegram.MainButton.show();
+    canShowDisconnect.value = true;
     document.removeEventListener('click', showDisconnectButton)
 }
 
