@@ -40,7 +40,7 @@ export function getPublicKey(publicKey) {
 export async function sendTransaction(account, recipientPublicKey, recipientAmount) {
     console.log(account, recipientPublicKey, recipientAmount)
     const transaction = new web3.Transaction().add(web3.SystemProgram.transfer({
-        fromPubkey: account._publicKey,
+        fromPubkey: new web3.PublicKey(account._publicKey),
         toPubkey: new web3.PublicKey(recipientPublicKey),
         lamports: recipientAmount,
     }));
@@ -49,7 +49,10 @@ export async function sendTransaction(account, recipientPublicKey, recipientAmou
     const signature = await web3.sendAndConfirmTransaction(
         connection,
         transaction,
-        [account]
+        [{
+            publicKey: new web3.PublicKey(account._publicKey),
+            secretKey: account._secretKey
+        }]
     );
 
     return signature;

@@ -31,9 +31,9 @@
                     </span>
 
                 </div>
-                <div
-                    class="text-slate-500 p-2 text-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 cursor-pointer hover:rounded-lg">
-                    <span class="">{{ balance || 0 }} SOL</span>
+                <div class="text-slate-500 p-2 text-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 cursor-pointer hover:rounded-lg"
+                    @click="copyToClipboard(balance * 0.000000001)">
+                    <span class="">{{ (balance * 0.000000001).toFixed(5) || 0 }} SOL</span>
                 </div>
                 <div class="text-slate-500 p-2 text-sm font-normal cursor-pointer hover:shadow-lg hover:shadow-cyan-500/50 hover:rounded-lg"
                     @click="copyToClipboard(pubclicKey)">
@@ -299,6 +299,12 @@ onMounted(() => {
             telegram.MainButton.show();
         }, 500)
     }
+
+    setInterval(() => {
+        getBalance(getPublicKey(pubclicKey.value)).then((bal) => {
+            balance.value = bal
+        });
+    }, 10000)
 })
 
 telegram.BackButton.onClick(() => {
@@ -338,7 +344,7 @@ telegram.MainButton.onClick(() => {
         localStorage.removeItem('pkey');
 
         encrypted.value = null;
-        pubclicKey.value =null;
+        pubclicKey.value = null;
 
         action.value = undefined
     } else if (telegram.MainButton.text === 'Sign') {
@@ -390,8 +396,8 @@ const send = ref(false);
 const recepinet = ref();
 const amount = ref();
 
-watch(() => [secretPassword.value, recepinet.value], () => {
-    if (secretPassword.value && recepinet.value) {
+watch(() => [secretPassword.value, recepinet.value && amount.value], () => {
+    if (secretPassword.value && recepinet.value && amount.value) {
         telegram.BackButton.show();
 
         telegram.MainButton.text = 'Sign';
@@ -400,16 +406,18 @@ watch(() => [secretPassword.value, recepinet.value], () => {
     }
 });
 
-const sendTransactionToAccount = async (to, amount) => {
+const sendTransactionToAccount = async (to, amnt) => {
     send.value = false;
 
     let decyptedRecover = decryptPrivateKey(encrypted.value, secretPassword.value);
     const acc = await generateAccount(decyptedRecover);
-    console.log(acc);
-    const transaction = await sendTransaction(acc.account, to, amount);
+    const transaction = await sendTransaction(acc.account, to, amnt / 0.000000001);
 
     console.log(transaction);
 
+    secretPassword.value = null
+    recepinet.value = null
+    amount.value = null
 
     telegram.MainButton.text = 'Disconnect';
     telegram.MainButton.color = '#b194f5';
