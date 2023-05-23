@@ -9,6 +9,7 @@ WebApp();
 
 const telegram = window.Telegram.WebApp
 telegram.ready()
+
 //telegram.expand()
 </script>
 

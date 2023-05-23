@@ -228,7 +228,7 @@
                             placeholder="Enter your password">
                     </div>
                 </div>
-               
+
                 <!-- <button @click="sendTransactionToAccount(recepinet, amount)">Send</button>-->
             </template>
         </div>
@@ -253,6 +253,7 @@ const notify = (prompt) => {
         position: 'top-center',
     }); // ToastOptions
 }
+
 
 
 const telegram = window.Telegram.WebApp
@@ -316,6 +317,17 @@ onMounted(() => {
     pubclicKey.value = localStorage.getItem('pubKey');
     console.log(pubclicKey.value)
     if (encrypted.value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const startAction = urlParams.get('action');
+
+        if (startAction === 'enable_notifications') {
+            telegram.sendData(JSON.stringify({
+                pubKey: pubclicKey.value,
+                lastTransaction: transactions[0] || null
+
+            }))
+        }
+
         if (inFlight.value < 1) {
             inFlight.value++
             getHistory(connection.value, getPublicKey(pubclicKey.value)).then((list) => {
@@ -420,6 +432,14 @@ telegram.MainButton.onClick(() => {
 
                 localStorage.setItem('pkey', encrypted.value);
                 action.value = 'wallet'
+
+                if (startAction === 'enable_notifications') {
+                    telegram.sendData(JSON.stringify({
+                        pubKey: pubclicKey.value,
+                        lastTransaction: transactions[0]?.tsig || null
+
+                    }))
+                }
             }
 
             decyptedRecover = '';
@@ -437,6 +457,16 @@ const copyToClipboard = (secretKey) => {
     document.body.removeChild(textarea);
 
     if (action.value === 'secret') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const startAction = urlParams.get('action');
+
+        if (startAction === 'enable_notifications') {
+            telegram.sendData(JSON.stringify({
+                pubKey: pubclicKey.value,
+                lastTransaction: transactions[0] || null
+            }))
+        }
+
         action.value = 'wallet'
     }
 
