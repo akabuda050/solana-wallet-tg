@@ -164,27 +164,29 @@
                     <div
                         class="flex flex-col gap-2 rounded-md shadow-lg bg-gray-100 opacity-90 p-4 hover:shadow-cyan-500/50">
                         <template v-if="transactions.length">
-                            <div class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200"
-                                v-for="transaction in transactions" :key="transaction.tsig">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center justify-center rounded-full shadow-md w-8 h-8" :class="{
+                            <TransitionGroup name="list" tag="div">
+                                <div class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200"
+                                    v-for="transaction in transactions" :key="transaction.tsig">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex items-center justify-center rounded-full shadow-md w-8 h-8" :class="{
 
-                                        'bg-sky-500 shadow-cyan-500/50': pubclicKey === transaction.accounts[0],
-                                        'bg-green-500 shadow-green-500/50': pubclicKey !== transaction.accounts[0],
-                                    }">
-                                        <font-awesome-icon size="sm"
-                                            :icon="pubclicKey === transaction.accounts[0] ? faPaperPlane : faDownload"
-                                            class="text-white" />
+                                            'bg-sky-500 shadow-cyan-500/50': pubclicKey === transaction.accounts[0],
+                                            'bg-green-500 shadow-green-500/50': pubclicKey !== transaction.accounts[0],
+                                        }">
+                                            <font-awesome-icon size="sm"
+                                                :icon="pubclicKey === transaction.accounts[0] ? faPaperPlane : faDownload"
+                                                class="text-white" />
+                                        </div>
+                                        <span class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">{{
+                                            transaction.tsig }}</span>
                                     </div>
-                                    <span class="text-slate-500 text-xs font-semibold max-w-[150px] truncate">{{
-                                        transaction.tsig }}</span>
+                                    <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
+                                    <span class="text-xs font-semibold" :class="{
+                                        'text-red-600': pubclicKey === transaction.accounts[0],
+                                        'text-green-600': pubclicKey !== transaction.accounts[0],
+                                    }">${{ (transaction.amount * 0.000000001).toFixed(5) }}</span>
                                 </div>
-                                <span class="text-slate-500 text-xs text-slate-500 font-semibold">SOL</span>
-                                <span class="text-xs font-semibold" :class="{
-                                    'text-red-600': pubclicKey === transaction.accounts[0],
-                                    'text-green-600': pubclicKey !== transaction.accounts[0],
-                                }">${{ (transaction.amount * 0.000000001).toFixed(5) }}</span>
-                            </div>
+                            </TransitionGroup>
                         </template>
                         <template v-else>
                             <div
@@ -215,7 +217,7 @@
                             placeholder="Enter your password">
                     </div>
                 </div>
-
+                <button @click="sendTransactionToAccount(recepinet, amount)">Send</button>
             </template>
         </div>
     </div>
@@ -461,4 +463,15 @@ const sendTransactionToAccount = async (to, amnt) => {
     telegram.BackButton.hide();
 }
 </script>
-<style scoped></style>
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+</style>
