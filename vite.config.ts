@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill'
+import inject from '@rollup/plugin-inject'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -13,18 +13,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  optimizeDeps: {
-    esbuildOptions: {
-      // Node.js global to browser globalThis
-      define: {
-        global: 'globalThis'
-      },
-      // Enable esbuild polyfill plugins
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          buffer: true
-        })
-      ]
-    }
-  }
+  build: {
+		rollupOptions: {
+			plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
+		},
+	},
 })
