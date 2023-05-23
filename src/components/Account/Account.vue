@@ -31,13 +31,17 @@
                     </span>
 
                 </div>
-                <div class="text-slate-500 p-2 text-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 cursor-pointer hover:rounded-lg"
-                    @click="copyToClipboard(balance * 0.000000001)">
-                    <span class="">{{ (balance * 0.000000001).toFixed(5) || 0 }} SOL</span>
-                </div>
-                <div class="text-slate-500 p-2 text-sm font-normal cursor-pointer hover:shadow-lg hover:shadow-cyan-500/50 hover:rounded-lg"
-                    @click="copyToClipboard(pubclicKey)">
-                    <span class="">{{ pubclicKey }}</span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-x-1 text-slate-500 p-2 text-sm font-semibold hover:shadow-lg hover:shadow-cyan-500/50 cursor-pointer hover:rounded-lg"
+                        @click="copyToClipboard(balance * 0.000000001)">
+                        <span class="">{{ (balance * 0.000000001).toFixed(5) || 0 }}</span>
+                        <span class="">SOL</span>
+
+                    </div>
+                    <div class="truncate text-slate-500 p-2 text-sm font-normal cursor-pointer hover:shadow-lg hover:shadow-cyan-500/50 hover:rounded-lg"
+                        @click="copyToClipboard(pubclicKey)">
+                        <span class="">{{ pubclicKey }}</span>
+                    </div>
                 </div>
             </template>
             <template v-else-if="action === 'new'">
@@ -143,7 +147,10 @@
 
                     </div>
                     <div class="flex flex-col items-center gap-1">
-                        <div @click="requestAirdrop(pubclicKey)"
+                        <div @click="() => {
+                            requestAirdrop(pubclicKey)
+                            notify('Requested. Please wait.');
+                        }"
                             class="flex items-center justify-center bg-green-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-green-500/50 w-14 h-14">
                             <font-awesome-icon size="xl" :icon="faDownload" class="text-white" />
                         </div>
@@ -151,7 +158,9 @@
 
                     </div>
                     <div class="flex flex-col items-center gap-1">
-                        <div
+                        <div @click="() => {
+                            notify('To be done :)');
+                        }"
                             class="flex items-center justify-center bg-yellow-500 cursor-pointer rounded-full hover:opacity-75 shadow-md hover:shadow-lg hover:shadow-yellow-500/50 w-14 h-14">
                             <font-awesome-icon size="xl" :icon="faFileInvoiceDollar" class="text-white" />
                         </div>
@@ -166,7 +175,9 @@
                         <template v-if="transactions.length">
                             <TransitionGroup name="list" tag="div">
                                 <div class="flex items-center justify-between bg-gray-100 cursor-pointer p-2 hover:rounded-md hover:bg-slate-200"
-                                    v-for="transaction in transactions" :key="transaction.tsig">
+                                    v-for="transaction in transactions" :key="transaction.tsig" @click="() => {
+                                        copyToClipboard(transaction.tsig)
+                                    }">
                                     <div class="flex items-center gap-3">
                                         <div class="flex items-center justify-center rounded-full shadow-md w-8 h-8" :class="{
 
@@ -231,6 +242,17 @@ import { onMounted, ref, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowRight, faDownload, faFileInvoiceDollar } from '@fortawesome/free-solid-svg-icons'
 import { faSquarePlus, faFileText, faPaperPlane, } from '@fortawesome/free-regular-svg-icons'
+import { toast } from 'vue3-toastify';
+
+const notify = (prompt) => {
+    toast(prompt, {
+        closeButton: false,
+        autoClose: 1000,
+        closeOnClick: true,
+        position: 'top-center',
+    }); // ToastOptions
+}
+
 
 const telegram = window.Telegram.WebApp
 const decrypted = ref(null);
@@ -317,7 +339,7 @@ onMounted(() => {
 
         setTimeout(() => {
             telegram.MainButton.show();
-        }, 500)
+        }, 1000)
     }
 
     setInterval(() => {
@@ -328,12 +350,14 @@ onMounted(() => {
                 if (trans.length && !transactions.value.some((t) => t.tsig === trans[0]?.tsig)) {
                     transactions.value.unshift(trans[0]);
                     balance.value = trans[0]?.balance || 0;
+
+                    notify(`Receied: ${((trans[0]?.amount || 0) * 0.000000001).toFixed(5)}`);
                 }
             }).finally(() => {
                 inFlight.value--
             });
         }
-    }, 3000)
+    }, 10000)
 })
 
 telegram.BackButton.onClick(() => {
@@ -418,7 +442,12 @@ const copyToClipboard = (secretKey) => {
     document.execCommand('copy');
     document.body.removeChild(textarea);
 
-    action.value = 'wallet'
+    if (action.value === 'secret') {
+        action.value = 'wallet'
+    }
+
+    notify('Copied.');
+
 }
 
 const send = ref(false);
@@ -440,6 +469,8 @@ const sendTransactionToAccount = async (to, amnt) => {
 
     let decyptedRecover = decryptPrivateKey(encrypted.value, secretPassword.value);
     const acc = await generateAccount(decyptedRecover);
+
+    notify('Sent. Wait confirmation.');
     const transaction = await sendTransaction(acc.account, to, amnt / 0.000000001);
 
     transactions.value.unshift({
@@ -449,8 +480,10 @@ const sendTransactionToAccount = async (to, amnt) => {
         accounts: [pubclicKey.value]
     })
 
-    balance.value = balance.value - amnt / 0.000000001;
+    notify('Confirmed.');
 
+
+    balance.value = balance.value - amnt / 0.000000001;
     console.log(transaction);
 
     secretPassword.value = null

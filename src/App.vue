@@ -2,6 +2,8 @@
 // @ts-nocheck
 import Account from './components/Account/Account.vue';
 import {WebView, WebApp} from './scripts/tg';
+import 'vue3-toastify/dist/index.css';
+
 WebView();
 WebApp();
 
@@ -11,9 +13,7 @@ telegram.ready()
 </script>
 
 <template>
-  <main class="container mx-auto px-5 py-3">
     <Account />
-  </main>
 </template>
 
 <style scoped></style>

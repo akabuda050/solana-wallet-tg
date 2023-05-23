@@ -24,7 +24,8 @@
     "crypto-js": "^4.1.1",
     "ed25519-hd-key": "^1.3.0",
     "sjcl": "^1.0.8",
-    "vue": "^3.3.2"
+    "vue": "^3.3.2",
+    "vue3-toastify": "^0.1.10"
   },
   "devDependencies": {
     "@tsconfig/node18": "^2.0.1",

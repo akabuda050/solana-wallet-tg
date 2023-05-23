@@ -73,7 +73,7 @@ export async function getHistory(publicKey, options = { limit: 5, before: undefi
 
         const preBalance = itsMine ? trans?.meta?.preBalances[0] : trans?.meta?.preBalances[1] || 0;
         const postBalance = itsMine ? trans?.meta?.postBalances[0] : trans?.meta?.postBalances[1] || 0;
-
+        
         return {
             tsig: t.signature,
             balance: postBalance,
