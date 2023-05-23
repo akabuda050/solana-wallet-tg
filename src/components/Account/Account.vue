@@ -228,7 +228,7 @@ import { faSquarePlus, faFileText, faPaperPlane, } from '@fortawesome/free-regul
 const telegram = window.Telegram.WebApp
 const decrypted = ref(null);
 const encrypted = ref();
-const balance = ref();
+const balance = ref(0);
 const pubclicKey = ref('');
 
 const action = ref<string | undefined>(undefined)
