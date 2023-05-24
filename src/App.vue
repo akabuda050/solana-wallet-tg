@@ -22,7 +22,12 @@ WebView();
 WebApp();
 
 const telegram = window.Telegram.WebApp
-telegram.ready()
+
+if (telegram) {
+    telegram.ready()
+    telegram.MainButton.hide()
+}
+
 
 //telegram.expand()
 const connected = !!localStorage.getItem('pkey') && !!localStorage.getItem('pubKey')
