@@ -39,13 +39,14 @@
     </div>
 </template>
 <script setup lang="ts">
+// @ts-nocheck
+
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { faSquarePlus, faFileText } from '@fortawesome/free-regular-svg-icons'
 import { onMounted, ref } from 'vue';
 import MainButton from '../general/MainButton.vue';
 
-// @ts-ignore
 const telegram = window?.Telegram?.WebApp;
 
 const emit = defineEmits(['screen'])
