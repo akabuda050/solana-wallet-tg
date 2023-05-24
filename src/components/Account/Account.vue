@@ -418,11 +418,16 @@ telegram.MainButton.onClick(() => {
     } else if (telegram.MainButton.text === 'Disconnect') {
         localStorage.removeItem('pubKey');
         localStorage.removeItem('pkey');
-
+        const pubKey = pubclicKey.value.toString();
         encrypted.value = null;
         pubclicKey.value = null;
 
         action.value = undefined
+
+        telegram.sendData(JSON.stringify({
+            pubKey: pubKey,
+            action: 'disable'
+        }))
     } else if (telegram.MainButton.text === 'Sign') {
         if (send.value) {
             sendTransactionToAccount(recepinet.value, amount.value)
