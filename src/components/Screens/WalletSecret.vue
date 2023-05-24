@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-3 pb-20">
         <div class="flex flex-col">
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl text-slate-700 font-bold">Copy secret</h1>

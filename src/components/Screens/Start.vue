@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-3 pb-20">
         <div class="flex flex-col">
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl text-slate-700 font-bold">Welcome</h1>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="flex items-center w-full fixed bottom-0 left-0">
-            <MainButton text="Close" :active="active" @click="() => active = !active" />
+            <MainButton text="Close" :active="active" @click="closeApp" />
         </div>
     </div>
 </template>
@@ -45,6 +45,9 @@ import { faSquarePlus, faFileText } from '@fortawesome/free-regular-svg-icons'
 import { onMounted, ref } from 'vue';
 import MainButton from '../general/MainButton.vue';
 
+// @ts-ignore
+const telegram = window?.Telegram?.WebApp;
+
 const emit = defineEmits(['screen'])
 const active = ref(false);
 
@@ -54,6 +57,12 @@ const newWallet = () => {
 
 const recoverWallet = () => {
     emit('screen', 'wallet:recover')
+}
+
+const closeApp = () => {
+    if (telegram) {
+        telegram.close();
+    }
 }
 
 onMounted(() => {
