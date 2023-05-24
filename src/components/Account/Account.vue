@@ -5,18 +5,8 @@
             <template v-if="action === undefined">
                 <div class="flex items-center justify-between">
                     <h1 class="text-3xl text-slate-700 font-bold">Welcome</h1>
-                    <span class="inline-flex items-center justify-center h-4 w-4 rounded-full border-black" :class="{
-                        'bg-green-500': !!encrypted,
-                        'bg-gray-500': !encrypted
-                    }">
-                        <svg class="h-2 w-2 text-white" viewBox="0 0 8 8" fill="currentColor">
-                            <circle cx="2" cy="2" />
-                        </svg>
-                    </span>
-
                 </div>
                 <span class="text-slate-500">Awesome non-custodial wallet in your telegram</span>
-
             </template>
             <template v-else-if="action === 'wallet'">
                 <div class="flex items-center justify-between">
@@ -86,23 +76,7 @@
                 </div>
             </template>
             <template v-else-if="action === 'new'">
-                <div class="flex flex-col">
-                    <label for="password" class="font-semibold block mb-2">Password</label>
-                    <input type="password" id="password" v-model="password"
-                        class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Enter your password">
-                    <p class="text-sm text-gray-500 mb-1">Password must meet the following criteria:</p>
-                    <ul class="list-inside pl-2 mb-4">
-                        <li class="text-sm text-gray-700">8 or more characters</li>
-                        <li class="text-sm text-gray-700">At least one upper case character</li>
-                        <li class="text-sm text-gray-700">At least one digit</li>
-                        <li class="text-sm text-gray-700">At least one symbol</li>
-                    </ul>
-                    <label for="confirmPassword" class="font-semibold block mb-2">Confirm Password</label>
-                    <input type="password" id="confirmPassword" v-model="confirmPassword"
-                        class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Confirm your password">
-                </div>
+                
             </template>
             <template v-else-if="action === 'recover'">
                 <div class="flex flex-col">
@@ -236,7 +210,7 @@
 </template>
 <script setup lang="ts">
 // @ts-nocheck
-import { encryptPrivateKey, decryptPrivateKey, getRandomBytes } from '../../scripts/crypto';
+import { encryptPrivateKey, decryptPrivateKey } from '../../scripts/crypto';
 import { createConnection, getBalance, generateAccount, getPublicKey, sendTransaction, requestAirdrop, getHistory } from '../../scripts/solana';
 
 import { onMounted, ref, watch } from 'vue';
@@ -399,7 +373,7 @@ telegram.MainButton.onClick(() => {
         action.value = undefined
         telegram.MainButton.hide()
     } else if (telegram.MainButton.text === 'Confirm') {
-        getRandomBytes().then(({ account, mnemonic }) => {
+        generateAccount().then(({ account, mnemonic }) => {
             console.log({ account, mnemonic })
             pubclicKey.value = getPublicKey(account._publicKey).toBase58();
             localStorage.setItem('pubKey', pubclicKey.value);

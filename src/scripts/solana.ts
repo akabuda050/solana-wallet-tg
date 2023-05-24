@@ -1,5 +1,6 @@
 // @ts-nocheck
 import * as web3 from '@solana/web3.js';
+import type { Keypair } from '@solana/web3.js';
 
 // Create connection
 export function createConnection(url = "https://api.testnet.solana.com") {
@@ -10,13 +11,20 @@ export function createConnection(url = "https://api.testnet.solana.com") {
 import * as bip39 from 'bip39';
 import nacl from 'tweetnacl';
 
+/**
+ * 
+ * @param mnemonic 
+ * @returns {mnemonic: string, account: Keypair}
+ */
 export async function generateAccount(mnemonic) {
     const secret = mnemonic || await generateMnemonic();
     const seed = await bip39.mnemonicToSeed(secret);
-    const keyPair = nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
+    const copiedBuf = Uint8Array.prototype.slice.call(seed, 0, 32);
+    const keyPair = web3.Keypair.fromSeed(copiedBuf);
+
     return {
         mnemonic: secret,
-        account: new web3.Account(keyPair.secretKey)
+        account: keyPair
     }
 }
 
@@ -38,7 +46,7 @@ export function getPublicKey(publicKey) {
 export async function sendTransaction(connection, account, recipientPublicKey, recipientAmount) {
     console.log(account, recipientPublicKey, recipientAmount)
     const transaction = new web3.Transaction().add(web3.SystemProgram.transfer({
-        fromPubkey: new web3.PublicKey(account._publicKey),
+        fromPubkey: new web3.PublicKey(account.publicKey),
         toPubkey: new web3.PublicKey(recipientPublicKey),
         lamports: recipientAmount,
     }));
@@ -47,8 +55,8 @@ export async function sendTransaction(connection, account, recipientPublicKey, r
         connection,
         transaction,
         [{
-            publicKey: new web3.PublicKey(account._publicKey),
-            secretKey: account._secretKey
+            publicKey: new web3.PublicKey(account.publicKey),
+            secretKey: account.secretKey
         }]
     );
 
@@ -57,7 +65,7 @@ export async function sendTransaction(connection, account, recipientPublicKey, r
 
 // Get history
 // https://solana-labs.github.io/solana-web3.js/class/src/connection.js~Connection.html#instance-method-getConfirmedSignaturesForAddress
-export async function getHistory(connection, publicKey, options = { limit: 5, before: undefined }) {
+export async function getHistory(connection, publicKey, options: { limit: number, before?: string } = { limit: 5 }) {
     const transactions = await connection.getConfirmedSignaturesForAddress2(publicKey, options);
     const mappedTransactions = await Promise.all(transactions.map(async (t) => {
         const trans = await getTransaction(connection, t.signature);
@@ -68,7 +76,7 @@ export async function getHistory(connection, publicKey, options = { limit: 5, be
 
         const preBalance = itsMine ? trans?.meta?.preBalances[0] : trans?.meta?.preBalances[1] || 0;
         const postBalance = itsMine ? trans?.meta?.postBalances[0] : trans?.meta?.postBalances[1] || 0;
-        
+
         return {
             tsig: t.signature,
             balance: postBalance,
