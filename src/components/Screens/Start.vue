@@ -33,9 +33,6 @@
                 </div>
             </div>
         </div>
-        <div class="flex items-center w-full fixed bottom-0 left-0">
-            <MainButton text="Close" :active="active" @click="closeApp" />
-        </div>
     </div>
 </template>
 <script setup lang="ts">
@@ -44,7 +41,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { faSquarePlus, faFileText } from '@fortawesome/free-regular-svg-icons'
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import MainButton from '../general/MainButton.vue';
 
 const telegram = window?.Telegram?.WebApp;
@@ -68,5 +65,9 @@ const closeApp = () => {
 
 onMounted(() => {
     active.value = true;
+})
+
+onBeforeUnmount(() => {
+    active.value = false;
 })
 </script>

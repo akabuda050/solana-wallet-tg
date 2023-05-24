@@ -22,27 +22,20 @@
             <input type="password" id="confirmPassword" v-model="confirmPassword"
                 class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Confirm your password">
+                <label for="confirmPassword" class="font-semibold block mb-2">Confirm Password</label>
+            <input type="password" id="confirmPassword" v-model="confirmPassword"
+                class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Confirm your password">
+                <label for="confirmPassword" class="font-semibold block mb-2">Confirm Password</label>
+            <input type="password" id="confirmPassword" v-model="confirmPassword"
+                class="px-4 py-2 mb-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Confirm your password">
         </div>
-        <div class="flex items-center w-full fixed bottom-0 left-0">
-            <TransitionGroup name="slide-fade" @enter="() => {
-                if (passwordMatch && !active) {
-                    active = true
-                }
-
-            }" @after-leave="() => {
-    if (!passwordMatch && !active) {
-        active = true
-    }
-}">
-                <MainButton v-if="active" text="Back" :active="active" @click="() => emit('screen', 'start')" :key="1" />
-                <MainButton v-if="passwordMatch" :active="passwordMatch" text="Confirm" :key="2"
-                    @click="() => createAccount()" />
-            </TransitionGroup>
-        </div>
+       
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue';
+import { onMounted, ref, watch, computed, onBeforeUnmount } from 'vue';
 import MainButton from '../general/MainButton.vue';
 import { toast, type ToastType } from 'vue3-toastify';
 import { getPublicKey } from '@/scripts/solana';
@@ -93,6 +86,10 @@ const createAccount = async () => {
         confirmPassword.value = '';
     }
 }
+
+onBeforeUnmount(() => {
+    active.value = false;
+})
 </script>
 <style scoped>
 .slide-fade-enter-active {

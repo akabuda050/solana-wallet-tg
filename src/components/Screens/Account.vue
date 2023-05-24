@@ -22,9 +22,6 @@
             <ActionsToolBar @airdrop:request="onAirdropRequest" />
             <LastTransactions :transactions="transactions" :loading="loading" />
         </div>
-        <div class="flex items-center w-full fixed bottom-0 left-0">
-            <MainButton text="Disconnect" :active="active" @click="disconnectWallet" />
-        </div>
     </div>
 </template>
 <script setup lang="ts">

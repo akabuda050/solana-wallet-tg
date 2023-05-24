@@ -18,14 +18,10 @@
                 <pre class="whitespace-pre-wrap break-all text-sm font-mono text-gray-800">{{ privateKey }}</pre>
             </div>
         </div>
-        <div class="flex items-center w-full fixed bottom-0 left-0">
-            <MainButton text="Back" :active="active" @click="() => emit('screen', 'start')" :key="1" />
-        </div>
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue';
-import MainButton from '../general/MainButton.vue';
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 import { toast, type ToastType } from 'vue3-toastify';
 
 const notify = (prompt: string, type: ToastType = 'info') => {
@@ -58,7 +54,9 @@ const copyToClipboard = (text: string) => {
 
     emit('screen', 'account');
 }
-
+onBeforeUnmount(() => {
+    active.value = false;
+})
 </script>
 <style scoped>
 .slide-fade-enter-active {

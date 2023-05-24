@@ -9,7 +9,6 @@ export function createConnection(url = "https://api.testnet.solana.com") {
 
 // Generate account
 import * as bip39 from 'bip39';
-import nacl from 'tweetnacl';
 
 /**
  * 

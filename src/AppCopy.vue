@@ -1,5 +1,33 @@
 <template>
-    <Account />
+    <div>
+        <Transition name="slide-left">
+            <Start v-if="currentScreen === 'start'" @screen="screen" class="absolute top-0 left-0 w-full p-4" />
+            <Account v-else-if="currentScreen === 'account'" @screen="screen" class="absolute top-0 left-0 w-full p-4" />
+            <WalletNew v-else-if="currentScreen === 'wallet:new'" @screen="screen"
+                class="absolute top-0 left-0 w-full p-4" />
+            <WalletRecover v-else-if="currentScreen === 'wallet:recover'" @screen="screen"
+                class="absolute top-0 left-0 w-full p-4" />
+            <WalletSecret v-else-if="currentScreen === 'wallet:secret'" @screen="screen"
+                class="absolute top-0 left-0 w-full p-4" />
+        </Transition>
+        <div class="flex items-center w-full fixed bottom-0 left-0">
+            <TransitionGroup name="slide-down" @enter="() => {
+                if (button2Active && !button1Active) {
+                    button1Active = true
+                }
+
+            }" @after-leave="() => {
+    if (!button2Active && !button1Active) {
+        button1Active = true
+    }
+}">
+                <MainButton v-if="button1Active" :text="button1Text" :active="button1Active" @click="button1Clicked"
+                    :key="1" />
+                <MainButton v-if="button2Active" :text="button2Text" :active="button2Active" @click="button2Clicked"
+                    :key="2" />
+            </TransitionGroup>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -9,7 +37,7 @@ import Start from './components/Screens/Start.vue';
 import WalletNew from './components/Screens/WalletNew.vue';
 import WalletRecover from './components/Screens/WalletRecover.vue';
 import WalletSecret from './components/Screens/WalletSecret.vue';
-import Account from './components/Account/Account.vue';
+import Account from './components/Screens/Account.vue';
 
 import { WebView, WebApp } from './scripts/tg';
 import 'vue3-toastify/dist/index.css';
