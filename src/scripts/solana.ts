@@ -1,9 +1,8 @@
 // @ts-nocheck
 import * as web3 from '@solana/web3.js';
-import type { Keypair } from '@solana/web3.js';
 
 // Create connection
-export function createConnection(url = "https://api.testnet.solana.com") {
+export function createConnection(url = "https://api.solana.com") {
     return new web3.Connection(url, 'confirmed');
 }
 
