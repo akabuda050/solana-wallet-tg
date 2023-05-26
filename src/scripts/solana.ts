@@ -2,7 +2,7 @@
 import * as web3 from '@solana/web3.js';
 
 // Create connection
-export function createConnection(url = "https://api.solana.com") {
+export function createConnection(url = "https://api.mainnet-beta.solana.com") {
     return new web3.Connection(url, 'confirmed');
 }
 
